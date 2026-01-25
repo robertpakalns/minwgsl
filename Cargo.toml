@@ -1,0 +1,23 @@
+[package]
+name = "minify-wgsl"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = "symbols"
+debug = false
+debug-assertions = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+naga = { version = "28.0.0", default-features = false, features = [
+  "wgsl-in",
+  "wgsl-out",
+] }
+wasm-bindgen = { version = "0.2.108", default-features = false }
