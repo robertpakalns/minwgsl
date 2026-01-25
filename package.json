@@ -1,9 +1,9 @@
 {
   "scripts": {
     "build": "bun run pack-wasm",
-    "extract": "bun run build && wasm2wat pkg/minify_wgsl_bg.wasm -o pkg/.wat",
-    "opt": "wasm-opt -Oz pkg/minify_wgsl_bg.wasm -o pkg/minify_wgsl_bg.wasm --enable-bulk-memory --enable-nontrapping-float-to-int --strip-debug --strip-dwarf --strip-producers --strip-target-features",
+    "extract": "bun run build && wasm2wat pkg/minwgsl_bg.wasm -o pkg/.wat",
+    "opt": "wasm-opt -Oz pkg/minwgsl_bg.wasm -o pkg/minwgsl_bg.wasm --enable-bulk-memory --enable-nontrapping-float-to-int --strip-debug --strip-dwarf --strip-producers --strip-target-features",
     "test": "cargo test --target x86_64-pc-windows-msvc",
-    "pack-wasm": "cargo build -r && wasm-bindgen target/wasm32-unknown-unknown/release/minify_wgsl.wasm --out-dir pkg --target nodejs && bun run opt"
+    "pack-wasm": "cargo build -r && wasm-bindgen target/wasm32-unknown-unknown/release/minwgsl.wasm --out-dir pkg --target nodejs && bun run opt"
   }
 }

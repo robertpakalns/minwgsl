@@ -1,5 +1,5 @@
 [package]
-name = "minify-wgsl"
+name = "minwgsl"
 version = "0.1.0"
 edition = "2024"
 
