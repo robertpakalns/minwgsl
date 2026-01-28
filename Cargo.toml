@@ -1,7 +1,11 @@
 [package]
 name = "minwgsl"
 version = "0.1.0"
+authors = ["robertpakalns"]
 edition = "2024"
+description = "WGSL minifier written in Rust"
+repository = "https://github.com/robertpakalns/minwgsl"
+license-file = "./LICENSE"
 
 [profile.release]
 panic = "abort"
