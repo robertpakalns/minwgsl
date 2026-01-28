@@ -17,6 +17,25 @@ jobs:
           bun-version: latest
           registry-url: "https://registry.npmjs.org"
 
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - run: rustup target add wasm32-unknown-unknown
+
+      - name: Install Binaryen
+        run: |
+          v=125
+          wget https://github.com/WebAssembly/binaryen/releases/download/version_${v}/binaryen-version_${v}-x86_64-linux.tar.gz
+          tar -xzf binaryen-version_${v}-x86_64-linux.tar.gz
+          echo "$PWD/binaryen-version_${v}/bin" >> $GITHUB_PATH
+
+      - name: Install wasm-bindgen CLI
+        run: |
+          v=0.2.108
+          wget https://github.com/wasm-bindgen/wasm-bindgen/releases/download/${v}/wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
+          tar -xzf wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
+          echo "$PWD/wasm-bindgen-${v}-x86_64-unknown-linux-musl" >> $GITHUB_PATH
+
       - run: |
           PUBLISHED=$(npm view $(jq -r .name package.json) version)
           LOCAL=$(jq -r .version package.json)
