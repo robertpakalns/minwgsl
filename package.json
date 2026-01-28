@@ -14,5 +14,6 @@
     "dist/minwgsl_bg.wasm",
     "dist/minwgsl.d.ts"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "main": "dist/minwgsl.js"
 }

@@ -1,0 +1,35 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+          registry-url: "https://registry.npmjs.org"
+
+      - run: |
+          PUBLISHED=$(npm view $(jq -r .name package.json) version)
+          LOCAL=$(jq -r .version package.json)
+
+          if [ "$PUBLISHED" = "$LOCAL" ]; then
+            echo "Error: Version $LOCAL is already published."
+            exit 1
+          fi
+
+      - run: bun install
+
+      - run: bun run build
+
+      - run: bun publish --access public
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
