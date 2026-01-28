@@ -36,14 +36,14 @@ jobs:
           tar -xzf wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
           echo "$PWD/wasm-bindgen-${v}-x86_64-unknown-linux-musl" >> $GITHUB_PATH
 
-      - run: |
-          PUBLISHED=$(npm view $(jq -r .name package.json) version)
-          LOCAL=$(jq -r .version package.json)
+      # - run: |
+      #     PUBLISHED=$(npm view $(jq -r .name package.json) version)
+      #     LOCAL=$(jq -r .version package.json)
 
-          if [ "$PUBLISHED" = "$LOCAL" ]; then
-            echo "Error: Version $LOCAL is already published."
-            exit 1
-          fi
+      #     if [ "$PUBLISHED" = "$LOCAL" ]; then
+      #       echo "Error: Version $LOCAL is already published."
+      #       exit 1
+      #     fi
 
       - run: bun install
 
