@@ -12,6 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - run: |
+          PUBLISHED=$(npm view $(jq -r .name package.json) version)
+          LOCAL=$(jq -r .version package.json)
+
+          if [ "$PUBLISHED" = "$LOCAL" ]; then
+            echo "Error: Version $LOCAL is already published."
+            exit 1
+          fi
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -35,15 +44,6 @@ jobs:
           wget https://github.com/wasm-bindgen/wasm-bindgen/releases/download/${v}/wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
           tar -xzf wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
           echo "$PWD/wasm-bindgen-${v}-x86_64-unknown-linux-musl" >> $GITHUB_PATH
-
-      # - run: |
-      #     PUBLISHED=$(npm view $(jq -r .name package.json) version)
-      #     LOCAL=$(jq -r .version package.json)
-
-      #     if [ "$PUBLISHED" = "$LOCAL" ]; then
-      #       echo "Error: Version $LOCAL is already published."
-      #       exit 1
-      #     fi
 
       - run: bun install
 

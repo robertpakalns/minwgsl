@@ -38,7 +38,9 @@ pub fn minify(source: &str) -> Result<String, String> {
     let wgsl = wgsl_back::write_string(&module, &info, wgsl_back::WriterFlags::empty())
         .map_err(|e| e.to_string())?;
 
-    Ok(minify_wgsl(&wgsl))
+    let res_wgsl = unsafe_rename_locals(&wgsl);
+
+    Ok(minify_wgsl(&res_wgsl))
 }
 
 #[inline]
@@ -261,6 +263,68 @@ fn minify_wgsl(src: &str) -> String {
         last = c;
 
         finished_attribute = false;
+    }
+
+    out
+}
+
+/// Renames all local variables named `_eX` to minified names.
+///
+/// It is unsafe because it scans a string intead of working with `naga` IR
+pub fn unsafe_rename_locals(wgsl: &str) -> String {
+    let mut out = String::with_capacity(wgsl.len());
+    let mut map: HashMap<&str, String> = HashMap::new();
+    let mut count = 0;
+
+    let mut i = 0;
+    while i < wgsl.len() {
+        if wgsl[i..].starts_with("let ") {
+            let kw_len = 4;
+            out.push_str(&wgsl[i..i + kw_len]);
+            i += kw_len;
+
+            let start = i;
+            while i < wgsl.len() {
+                let c = wgsl.as_bytes()[i] as char;
+                if !(c.is_ascii_alphanumeric() || c == '_') {
+                    break;
+                }
+                i += 1;
+            }
+
+            let var_name = &wgsl[start..i];
+            let new_name = if var_name.starts_with("_e")
+                && var_name[2..].chars().all(|c| c.is_ascii_digit())
+            {
+                map.entry(var_name).or_insert_with(|| {
+                    let name = (b'a' + (count % 26) as u8) as char;
+                    count += 1;
+                    name.to_string()
+                })
+            } else {
+                &var_name.to_string()
+            };
+
+            out.push_str(new_name);
+        } else if wgsl.as_bytes()[i].is_ascii_alphanumeric() || wgsl.as_bytes()[i] == b'_' {
+            let start = i;
+            while i < wgsl.len() {
+                let c = wgsl.as_bytes()[i] as char;
+                if !(c.is_ascii_alphanumeric() || c == '_') {
+                    break;
+                }
+                i += 1;
+            }
+            let ident = &wgsl[start..i];
+            if let Some(min_name) = map.get(ident) {
+                out.push_str(min_name);
+            } else {
+                out.push_str(ident);
+            }
+        } else {
+            out.push(wgsl.as_bytes()[i] as char);
+            i += 1;
+        }
     }
 
     out
