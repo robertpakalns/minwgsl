@@ -12,7 +12,8 @@
   "files": [
     "dist/minwgsl.js",
     "dist/minwgsl_bg.wasm",
-    "dist/minwgsl.d.ts"
+    "dist/minwgsl.d.ts",
+    "dist/README.md"
   ],
   "license": "MIT",
   "main": "dist/minwgsl.js"
