@@ -1,6 +1,6 @@
 {
   "name": "minwgsl",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "bun run pack-wasm && bun build pkg/minwgsl.js --outdir dist --minify && bun run copy-files",
     "extract": "bun run build && wasm2wat pkg/minwgsl_bg.wasm -o pkg/.wat",
