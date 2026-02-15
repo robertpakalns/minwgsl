@@ -1,3 +1,20 @@
+#![no_std]
+extern crate alloc;
+
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+#[cfg(not(test))]
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+use hashbrown::HashMap;
 use naga::{
     Expression, Function, Handle, Module, StructMember, Type, TypeInner, UniqueArena,
     back::wgsl as wgsl_back,
@@ -5,7 +22,6 @@ use naga::{
     front::wgsl as wgsl_front,
     valid::{Capabilities, ValidationFlags, Validator},
 };
-use std::collections::HashMap;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 mod tests;

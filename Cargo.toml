@@ -20,8 +20,11 @@ debug-assertions = false
 crate-type = ["cdylib"]
 
 [dependencies]
-naga = { version = "28.0.0", default-features = false, features = [
+hashbrown = { version = "0.16.1", default-features = false }
+# Allows building WASM with no_std
+naga = { version = "28.0.0", git = "https://github.com/robertpakalns/wgpu.git", commit = "da1e5cd", default-features = false, features = [
   "wgsl-in",
   "wgsl-out",
 ] }
 wasm-bindgen = { version = "0.2.108", default-features = false }
+wee_alloc = { version = "0.4.5", default-features = false }
