@@ -22,7 +22,7 @@ crate-type = ["cdylib"]
 [dependencies]
 hashbrown = { version = "0.16.1", default-features = false }
 # Allows building WASM with no_std
-naga = { version = "28.0.0", git = "https://github.com/robertpakalns/wgpu.git", commit = "da1e5cd", default-features = false, features = [
+naga = { version = "28.0.0", git = "https://github.com/robertpakalns/wgpu.git", rev = "da1e5cdf330ef64f3b8eb016f477a8365317cf5b", default-features = false, features = [
   "wgsl-in",
   "wgsl-out",
 ] }
