@@ -16,17 +16,22 @@ bun add minwgsl -D
 ````
 
 ```js
-import init, { minify } from "minwgsl"
+import { minify } from "minwgsl";
 
-await init()
-
-const wgsl = `@vertex
+const source = `@vertex
 fn vs_main(@location(0) pos: vec3<f32>) -> @builtin(position) vec4<f32> {
     return vec4<f32>(pos, 1.0);
 }`;
 
-const minified = minify(wgsl);
+const minified = minify(source);
 
+console.log(minified);
+
+```
+
+Approximate output: 
+```
+@vertex fn vs_main(@location(0)b:vec3<f32>)->@builtin(position)vec4<f32>{return vec4<f32>(b,1f);}
 ```
 
 ## Credits
