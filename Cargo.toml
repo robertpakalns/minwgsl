@@ -1,6 +1,6 @@
 [package]
 name = "minwgsl"
-version = "1.0.1"
+version = "1.0.3"
 authors = ["robertpakalns"]
 edition = "2024"
 description = "WGSL minifier written in Rust"
@@ -21,10 +21,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 hashbrown = { version = "0.16.1", default-features = false }
-# Allows building WASM with no_std
-naga = { version = "28.0.0", git = "https://github.com/robertpakalns/wgpu.git", rev = "da1e5cdf330ef64f3b8eb016f477a8365317cf5b", default-features = false, features = [
+naga = { version = "29.0.0", git = "https://github.com/gfx-rs/wgpu.git", rev = "73600f11d7f071f85ac38de473a5f96f2d343f10", default-features = false, features = [
   "wgsl-in",
   "wgsl-out",
 ] }
-wasm-bindgen = { version = "0.2.108", default-features = false }
+wasm-bindgen = { version = "0.2.114", default-features = false }
 wee_alloc = { version = "0.4.5", default-features = false }

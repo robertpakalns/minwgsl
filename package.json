@@ -1,6 +1,18 @@
 {
   "name": "minwgsl",
-  "version": "1.0.2",
+  "version": "1.0.3",
+  "description": "WGSL minifier written in Rust",
+  "license": "MIT",
+  "author": "robertpakalns",
+  "type": "module",
+  "main": "pkg/minwgsl.js",
+  "types": "pkg/minwgsl.d.ts",
+  "files": [
+    "pkg/minwgsl.js",
+    "pkg/minwgsl_bg.wasm",
+    "pkg/minwgsl.d.ts",
+    "pkg/README.md"
+  ],
   "scripts": {
     "build": "bun run pack-wasm",
     "extract": "bun run build && wasm2wat pkg/minwgsl_bg.wasm -o pkg/.wat",
@@ -8,12 +20,17 @@
     "test": "cargo test --target x86_64-pc-windows-msvc",
     "pack-wasm": "cargo build -r && wasm-bindgen target/wasm32-unknown-unknown/release/minwgsl.wasm --out-dir pkg --target nodejs && bun run opt"
   },
-  "files": [
-    "pkg/minwgsl.js",
-    "pkg/minwgsl_bg.wasm",
-    "pkg/minwgsl.d.ts",
-    "pkg/README.md"
-  ],
-  "license": "MIT",
-  "main": "pkg/minwgsl.js"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/robertpakalns/minwgsl.git"
+  },
+  "homepage": "https://github.com/robertpakalns/minwgsl#readme",
+  "bugs": {
+    "url": "https://github.com/robertpakalns/minwgsl/issues"
+  },
+  "keywords": [
+    "wgsl",
+    "minifier",
+    "webgpu"
+  ]
 }
