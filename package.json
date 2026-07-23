@@ -1,6 +1,6 @@
 {
   "name": "minwgsl",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "WGSL minifier written in Rust",
   "license": "MIT",
   "author": "robertpakalns",
