@@ -40,7 +40,7 @@ jobs:
 
       - name: Install wasm-bindgen CLI
         run: |
-          v=0.2.116
+          v=0.2.126
           wget https://github.com/wasm-bindgen/wasm-bindgen/releases/download/${v}/wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
           tar -xzf wasm-bindgen-${v}-x86_64-unknown-linux-musl.tar.gz
           echo "$PWD/wasm-bindgen-${v}-x86_64-unknown-linux-musl" >> $GITHUB_PATH
