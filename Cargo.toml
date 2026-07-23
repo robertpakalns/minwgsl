@@ -20,10 +20,10 @@ debug-assertions = false
 crate-type = ["cdylib"]
 
 [dependencies]
-hashbrown = { version = "0.16.1", default-features = false }
-naga = { version = "29.0.0", git = "https://github.com/gfx-rs/wgpu.git", rev = "73600f11d7f071f85ac38de473a5f96f2d343f10", default-features = false, features = [
+hashbrown = { version = "0.17.1", default-features = false }
+naga = { version = "30.0.0", default-features = false, features = [
   "wgsl-in",
   "wgsl-out",
 ] }
-wasm-bindgen = { version = "0.2.114", default-features = false }
+wasm-bindgen = { version = "0.2.126", default-features = false }
 wee_alloc = { version = "0.4.5", default-features = false }
