@@ -1,6 +1,6 @@
 [package]
 name = "minwgsl"
-version = "1.0.3"
+version = "1.0.5"
 authors = ["robertpakalns"]
 edition = "2024"
 description = "WGSL minifier written in Rust"
@@ -20,8 +20,10 @@ debug-assertions = false
 crate-type = ["cdylib"]
 
 [dependencies]
-hashbrown = { version = "0.17.1", default-features = false }
-naga = { version = "30.0.0", default-features = false, features = [
+hashbrown = { version = "0.17", default-features = false, features = [
+  "default-hasher",
+] }
+naga = { version = "30.0.1", default-features = false, features = [
   "wgsl-in",
   "wgsl-out",
 ] }

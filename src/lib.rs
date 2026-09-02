@@ -11,6 +11,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 }
 
 use alloc::{
+    collections::BTreeSet,
     string::{String, ToString},
     vec::Vec,
 };
@@ -23,8 +24,6 @@ use naga::{
     valid::{Capabilities, ValidationFlags, Validator},
 };
 use wasm_bindgen::prelude::wasm_bindgen;
-
-mod tests;
 
 const FIRST_LETTERS: [char; 52] = [
     'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J',
@@ -54,7 +53,7 @@ pub fn minify(source: &str) -> Result<String, String> {
     let wgsl = wgsl_back::write_string(&module, &info, wgsl_back::WriterFlags::empty())
         .map_err(|e| e.to_string())?;
 
-    let res_wgsl = unsafe_rename_locals(&wgsl);
+    let res_wgsl = rename_e_temps(&wgsl);
 
     Ok(minify_wgsl(&res_wgsl))
 }
@@ -284,64 +283,161 @@ fn minify_wgsl(src: &str) -> String {
     out
 }
 
-/// Renames all local variables named `_eX` to minified names.
-///
-/// It is unsafe because it scans a string intead of working with `naga` IR
-pub fn unsafe_rename_locals(wgsl: &str) -> String {
-    let mut out = String::with_capacity(wgsl.len());
-    let mut map: HashMap<&str, String> = HashMap::new();
-    let mut count = 0;
+fn rename_e_temps(wgsl: &str) -> String {
+    let mut used = BTreeSet::<String>::new();
 
+    let bytes = wgsl.as_bytes();
     let mut i = 0;
-    while i < wgsl.len() {
-        if wgsl[i..].starts_with("let ") {
-            let kw_len = 4;
-            out.push_str(&wgsl[i..i + kw_len]);
-            i += kw_len;
 
+    while i < bytes.len() {
+        if is_ident_start(bytes[i]) {
             let start = i;
-            while i < wgsl.len() {
-                let c = wgsl.as_bytes()[i] as char;
-                if !(c.is_ascii_alphanumeric() || c == '_') {
-                    break;
-                }
+            i += 1;
+
+            while i < bytes.len() && is_ident_continue(bytes[i]) {
                 i += 1;
             }
 
-            let var_name = &wgsl[start..i];
-            let new_name = if var_name.starts_with("_e")
-                && var_name[2..].chars().all(|c| c.is_ascii_digit())
-            {
-                map.entry(var_name).or_insert_with(|| {
-                    let name = (b'a' + (count % 26) as u8) as char;
-                    count += 1;
-                    name.to_string()
-                })
-            } else {
-                &var_name.to_string()
-            };
+            used.insert(wgsl[start..i].to_string());
+        } else {
+            i += 1;
+        }
+    }
 
-            out.push_str(new_name);
-        } else if wgsl.as_bytes()[i].is_ascii_alphanumeric() || wgsl.as_bytes()[i] == b'_' {
+    let mut next_name = 0usize;
+    let mut make_name = || {
+        loop {
+            let mut n = next_name;
+            next_name += 1;
+
+            let mut name = String::new();
+
+            name.push((b'a' + (n % 26) as u8) as char);
+            n /= 26;
+
+            while n != 0 {
+                name.push((b'a' + (n % 26) as u8) as char);
+                n /= 26;
+            }
+
+            if !used.contains(&name) && !is_wgsl_keyword(&name) {
+                used.insert(name.clone());
+                return name;
+            }
+        }
+    };
+
+    let mut rename_map = HashMap::<String, String>::new();
+
+    let mut out = String::with_capacity(wgsl.len());
+    let mut i = 0;
+
+    while i < bytes.len() {
+        if is_ident_start(bytes[i]) {
             let start = i;
-            while i < wgsl.len() {
-                let c = wgsl.as_bytes()[i] as char;
-                if !(c.is_ascii_alphanumeric() || c == '_') {
-                    break;
-                }
+            i += 1;
+
+            while i < bytes.len() && is_ident_continue(bytes[i]) {
                 i += 1;
             }
+
             let ident = &wgsl[start..i];
-            if let Some(min_name) = map.get(ident) {
-                out.push_str(min_name);
+
+            if is_e_temp(ident) {
+                let new_name = match rename_map.get(ident) {
+                    Some(name) => name.clone(),
+                    None => {
+                        let name = make_name();
+                        rename_map.insert(ident.to_string(), name.clone());
+                        name
+                    }
+                };
+
+                out.push_str(&new_name);
             } else {
                 out.push_str(ident);
             }
         } else {
-            out.push(wgsl.as_bytes()[i] as char);
+            out.push(bytes[i] as char);
             i += 1;
         }
     }
 
     out
+}
+
+fn is_ident_start(c: u8) -> bool {
+    c.is_ascii_alphabetic() || c == b'_'
+}
+
+fn is_ident_continue(c: u8) -> bool {
+    c.is_ascii_alphanumeric() || c == b'_'
+}
+
+fn is_e_temp(name: &str) -> bool {
+    let bytes = name.as_bytes();
+
+    bytes.len() > 2
+        && bytes[0] == b'_'
+        && bytes[1] == b'e'
+        && bytes[2..].iter().all(|c| c.is_ascii_digit())
+}
+
+fn is_wgsl_keyword(name: &str) -> bool {
+    matches!(
+        name,
+        "alias"
+            | "break"
+            | "case"
+            | "const"
+            | "continuing"
+            | "continue"
+            | "default"
+            | "discard"
+            | "else"
+            | "enable"
+            | "fn"
+            | "for"
+            | "if"
+            | "let"
+            | "loop"
+            | "override"
+            | "return"
+            | "struct"
+            | "switch"
+            | "var"
+            | "while"
+            | "atomic"
+            | "bool"
+            | "f16"
+            | "f32"
+            | "i32"
+            | "u32"
+            | "vec2"
+            | "vec3"
+            | "vec4"
+            | "mat2x2"
+            | "mat2x3"
+            | "mat2x4"
+            | "mat3x2"
+            | "mat3x3"
+            | "mat3x4"
+            | "mat4x2"
+            | "mat4x3"
+            | "mat4x4"
+            | "array"
+            | "ptr"
+            | "sampler"
+            | "texture_1d"
+            | "texture_2d"
+            | "texture_2d_array"
+            | "texture_3d"
+            | "texture_cube"
+            | "texture_cube_array"
+            | "texture_multisampled_2d"
+            | "texture_storage_1d"
+            | "texture_storage_2d"
+            | "texture_storage_2d_array"
+            | "texture_storage_3d"
+    )
 }
